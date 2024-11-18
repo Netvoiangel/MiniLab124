@@ -1,18 +1,28 @@
-const formValues = {}  // Сюда пишутся значения формы (Object как в Java, или dict из Python)
-const formValidation = {}  // Сюда пишутся статусы валидации каждого поля. Если поле ни разу не валидировалось,
+export const formValues = {}  // Сюда пишутся значения формы (Object как в Java, или dict из Python)
+export const formValidation = {
+  password: false,
+  password_repeat: false, // Убедитесь, что ключ совпадает
+};
+
 // то при обращении к Object вернётся undefined, который при логическом сравнении обрабатывается как false
 
 
 // Объявляется и инициализируется константная переменная
 // Инициализация функцией, заданной в стрелочном виде
-export const validatePassword = (e) => {
-  formValidation.password = e.target.value
-  console.log("Password validation...")
-  console.log(e)
-  // Напишите код валидации здесь и присвойте true/false в объект(словарь) formValidation
-  // formValidation.password = ...  // formValidation['password'] = ... - то же самое, но другой синтаксис
-  return formValidation.password !== undefined   // Это заглушка, return вероятно надо переписать
-}
+export const validatePassword = (password) => {
+  const minLength = 8;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+  const isValid = password.length >= minLength && hasUppercase && hasNumber && hasSpecialChar;
+
+  // В formValidation сохраняем статус валидации
+  formValidation.password = isValid;
+
+  return isValid;
+};
+
 
 
 export const validateEmail = (email) => {
@@ -31,18 +41,22 @@ export const getValidationStatus = () => {
   // Происходит функциональная мгаия, читай строчку кода ниже как:
   // Получить значения (не ключи) из объекта, затем применить к каждому значению функцию двойного логического отрицания
   // (преобразование к булевому типу) и результаты всех применений это true, то вернуть true, иначе - false
+  // Object.values(formValidation).forEach((e, i=0) => {console.log("validation status: ", e, " no ", i); i ++;})
   return Object.values(formValidation).every((validationStatus) => !!validationStatus)
 }
 
+export const validatePasswordRepeat = (repeatPassword, originalPassword) => {
+  return repeatPassword === originalPassword;  // Сравниваем с оригинальным паролем
+};
 
-// Функция возвращающая которая ставит значение поля в форме по ключу
+
 export const setFormValue = (valueKey, newValue, validator) => {
-  formValues[valueKey] = newValue
+  formValues[valueKey] = newValue;
   if (validator !== undefined) {
-    formValidation[valueKey] = validator(newValue)
+    formValidation[valueKey] = validator(newValue);
+    console.log(`Validation for ${valueKey}:`, formValidation[valueKey]); // Лог валидации
   }
-}
-
+};
 
 // Функция для обработки отправки формы регистрации
 // В этой функции должен быть http запрос на сервер для регистрации пользователя (сейчас просто демонстрация)
